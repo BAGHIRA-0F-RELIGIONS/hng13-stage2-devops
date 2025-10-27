@@ -1,0 +1,34 @@
+# nginx.conf
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream backend {
+    server app_blue:${PORT} max-fails=1 fail-timeout=3s;
+    server app_green:${PORT} backup;
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://backend;
+
+            prox_connect_timeout 3s;
+            proxy_send-timeout 3s;
+            proxy_read-timeout 3s;
+
+            proxy_next_upstream error timeout http_500 http_502 http_503 http_504;
+            proxy_next_upstream_tries 2;
+
+            proxy_pass_request_headers on;
+
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+}
