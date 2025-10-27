@@ -1,21 +1,21 @@
 version: '3.8'
 
-service:
+services:
   nginx:
     build:
-      context:
+      context: .
       dockerfile: Dockerfile.nginx
     ports:
-      - "8080.80"  
-    environments:
-        PORT=${PORT} 
+      - "8080:80"
+    environment:
+      - PORT=${PORT}
     depends_on:
-      - app_blue
-      - app_green
+      - blue_app
+      - green_app
     networks:
-      - app-network
+      - app_network
 
-blue_app:
+  blue_app:
     image: ${BLUE_IMAGE}
     container_name: blue_app
     ports:
@@ -27,11 +27,11 @@ blue_app:
     networks:
       - app_network
 
-green_app:
+  green_app:
     image: ${GREEN_IMAGE}
     container_name: green_app
     ports:
-      - "8082:${PORT}"   
+      - "8082:${PORT}"
     environment:
       - PORT=${PORT}
       - APP_POOL=green
